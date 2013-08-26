@@ -106,5 +106,5 @@ class ElasticSearch(base.SearchBackend):
             index.opened = False
             self._es.close_index(index.get_name())
 
-    def search(self, query, index=None, doc_type=None, **kwargs):
-        return self._es.search(query, index, doc_type, **kwargs)
+    def search(self, query, index=None, **kwargs):
+        return self._es.search(query, index, **kwargs)

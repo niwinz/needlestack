@@ -8,7 +8,7 @@ class Field(base.Field):
 
     def __init__(self, stored=False, index_name=None, analyzed=True, term_vector="no",
                  boost=1.0, analyzer=None, index_analyzer=None, search_analyzer=None,
-                 ignore_above=None):
+                 ignore_above=None, include_in_all=True):
 
         assert isinstance(stored, bool), "stored must be a bool type"
         self.stored = stored
@@ -28,6 +28,7 @@ class Field(base.Field):
         self.index_analyzer = index_analyzer
         self.search_analyzer = search_analyzer
         self.ignore_above = ignore_above
+        self.include_in_all = include_in_all
 
     def set_name(self, name):
         if self.index_name is None:
@@ -46,6 +47,7 @@ class Field(base.Field):
             "index_analyzer": self.index_analyzer,
             "analyzer": self.analyzer,
             "index_name": self.index_name,
+            "include_in_all": self.include_in_all,
         }
 
         return mapping
