@@ -19,6 +19,9 @@ _indexes_loaded = False
 def _register_index(cls):
     _indexes[cls.get_name()] = cls
 
+def _get_all_indexes():
+    return list(_indexes.values())
+
 
 def _load_all_indexes():
     global _indexes_loaded
