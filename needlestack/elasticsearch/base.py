@@ -34,28 +34,9 @@ class ElasticSearch(base.SearchBackend):
     _es = None # ElasticSearch backend connection
     _default_settings = None # default index settings
 
-    def _initialize_connection(self, *args, **kwargs):
-        self._es = pyelasticsearch.ElasticSearch(*args, **kwargs)
-
-    @classmethod
-    def from_pyelasticsearch_connection(cls, connection):
-        """
-        Helper method for crreate a elastic search backend from
-        a existing pyelasticsearch connection.
-        """
-
-        if not isinstance(connection, pyelasticsearch.ElasticSearch):
-            raise TypeError("connection must be instance of pyelasticsearch.ElasticSearch")
-
-        instance = cls(connection)
-        instance._es = connection
-        return instance
-
-    def __init__(self, urls=None, *args, **kwargs):
-        self._default_settings = {}
-
-        if urls is not None:
-            self._initialize_connection(urls, *args, **kwargs)
+    def __init__(self, urls, settings, *args, **kwargs):
+        self._default_settings = settings
+        self._es = pyelasticsearch.ElasticSearch(urls, *args, **kwargs)
 
     def get_data_from_model(self, index, model):
         data = {}
@@ -64,12 +45,6 @@ class ElasticSearch(base.SearchBackend):
             data[field_name] = getattr(model, field_name, None)
 
         return data
-
-    def set_default_settings(self, settins):
-        """
-        Set default settings for index creation.
-        """
-        self._default_settings = settins
 
     def update(self, index, document, **options):
         """
