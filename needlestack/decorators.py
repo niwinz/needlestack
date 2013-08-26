@@ -9,9 +9,10 @@ from .connections import manager
 from .index import _get_index, _load_all_indexes
 
 
-def register_with_index(cls=None, name=None, alias="default"):
+def register_with_index(cls=None, name=None, alias="default", auto_update=True):
     if cls is None:
-        return functools.partial(register_with_index, name=name, alias=alias)
+        return functools.partial(register_with_index, name=name, alias=alias,
+                                 auto_update=auto_update)
 
     if name is None:
         raise TypeError("name must be not None")
@@ -19,17 +20,20 @@ def register_with_index(cls=None, name=None, alias="default"):
     index = get_index(name)
     index.attach_model(cls)
 
-    def _update(sender, instance, **kwargs):
-        connection = manager.get_connection(alias)
-        data = connection.get_data_from_model(instance)
+    if auto_update:
+        def _update(sender, instance, **kwargs):
+            connection = manager.get_connection(alias)
+            data = connection.get_data_from_model(instance)
+            # TODO
 
-    def _delete(sender, instance, **kwargs):
-        pass
+        def _delete(sender, instance, **kwargs):
+            # TODO
+            pass
 
-    update_dispatch_uid = "needlestack_update_{0}".format(cls.__name__.lower())
-    delete_dispatch_uid = "needlestack_delete_{0}".format(cls.__name__.lower())
+        update_dispatch_uid = "needlestack_update_{0}".format(cls.__name__.lower())
+        delete_dispatch_uid = "needlestack_delete_{0}".format(cls.__name__.lower())
 
-    signals.pre_save.connect(_update, sender=cls, dispatch_uid=update_dispatch_uid)
-    signals.pre_delete.connect(_delete, sender=cls, dispatch_uid=delete_dispatch_uid)
+        signals.pre_save.connect(_update, sender=cls, dispatch_uid=update_dispatch_uid)
+        signals.pre_delete.connect(_delete, sender=cls, dispatch_uid=delete_dispatch_uid)
 
     return cls
