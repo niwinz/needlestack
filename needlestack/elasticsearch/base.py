@@ -86,7 +86,7 @@ class ElasticSearch(base.SearchBackend):
         index_name = index.get_name()
         try:
             self._es.delete_index(index_name)
-        except: pyelasticsearch.exceptions.ElasticHttpNotFoundError as e:
+        except pyelasticsearch.exceptions.ElasticHttpNotFoundError as e:
             raise exceptions.IndextDoesNotExists("{0} not found".format(index_name)) from e
 
     def create_index(self, index, settings=None):
@@ -111,7 +111,7 @@ class ElasticSearch(base.SearchBackend):
         Method that open an index.
         """
 
-        if not index.opened
+        if not index.opened:
             index.opened = True
             self._es.open_index(index.get_name())
 

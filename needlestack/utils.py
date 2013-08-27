@@ -3,6 +3,8 @@
 from __future__ import unicode_literals, absolute_import
 
 import functools
+import re
+
 from importlib import import_module
 from django.core.exceptions import ImproperlyConfigured
 

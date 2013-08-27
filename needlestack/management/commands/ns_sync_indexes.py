@@ -6,8 +6,8 @@ import sys
 
 from django.core.management.base import BaseCommand, CommandError
 
+from needlestack.base import _get_all_indexes
 from needlestack.connection import manager
-from needlestack.index import _get_all_indexes
 from needlestack.exceptions import IndexAlreadyExists
 
 

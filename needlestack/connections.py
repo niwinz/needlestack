@@ -14,21 +14,22 @@ class ConnectionManager(object):
         self._connections = local()
 
     def load_backend(self, alias="default"):
-        # TODO: more exceptions checks on obtain connections
-
         try:
             conf = getattr(settings, "NEEDLESTACK_CONNECTIONS")
         except AttributeError as e:
             raise ImproperlyConfigured("needlestack not configured") from e
 
+        if alias not in conf:
+            raise ImproperlyConfigured("connection with alias {0} "
+                                       "does not exists".format(alias))
         _conf = conf[alias]
 
-        cls = utils.load_class(_conf["backend"])
+        cls = utils.load_class(_conf["engine"])
         params = _conf["options"]
 
         return (cls, params)
 
-    def get_connection(self, alias):
+    def get_connection(self, alias="default"):
         if hasattr(self._connections, alias):
             return getattr(self._connections, alias)
 
