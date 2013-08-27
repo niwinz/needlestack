@@ -15,7 +15,24 @@ class Field(object):
     name = None
 
     def __init__(self, **kwargs)
-        self.options = kwargs
+        for name, value in kwargs.items():
+            setattr(self, name, value)
 
     def set_name(self, name):
         self.name = name
+
+    @classmethod
+    def from_python(cls, value):
+        """
+        Method for adapt document value from python
+        to backend specific format.
+        """
+        return value
+
+    @classmethod
+    def to_python(cls, value):
+        """
+        Method for adapt backend specific format to
+        native python format.
+        """
+        return value
