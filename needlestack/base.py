@@ -4,25 +4,7 @@ from __future__ import unicode_literals, absolute_import
 
 
 class SearchBackend(object):
-    def update(self, *args, **kwargs):
-        """
-        Method that creates or updates some document
-        on the search engine.
-        """
-        raise NotImplementedError()
-
-    def search(self, *args, **kwargs):
-        """
-        Makes a search and return a result.
-        """
-        raise NotImplementedError()
-
-    def flush(self):
-        """
-        Send flush/commit command to the
-        search engine.
-        """
-        raise NotImplementedError()
+    pass
 
 
 class Field(object):
