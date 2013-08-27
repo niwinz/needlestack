@@ -24,10 +24,26 @@ def _get_mappings_from_index(index):
     mapping = {}
 
     for field_name, field in index._meta.fields.items():
+        if isinstance(field, fields.IDField):
+            field_name = "_id"
+
         mapping[field_name] = field.mapping
 
     doc_type = _get_doc_type_from_index(index)
     return {doc_type: {"properties": mapping}}
+
+
+def _adapt_document_for_index(index, document):
+    result_doc = {}
+
+    for attr_name, attr_value in document:
+        if attr_name not in index._meta.fields:
+            continue
+
+        field = index._meta.field[attr_name]
+        result_doc[field.index_name] = field.from_python(attr_value)
+
+    return result_doc
 
 
 class ElasticSearch(base.SearchBackend):
@@ -57,7 +73,9 @@ class ElasticSearch(base.SearchBackend):
 
         index_name = index.get_name()
         index_doc_type = options.pop('doc_type', _get_doc_type_from_index(index))
-        self._es.index(index_name, index_doc_type, document, **options)
+
+        adapted_document = _adapt_document_for_index(index, document)
+        self._es.index(index_name, index_doc_type, adapted_document, **options)
 
     def get(self, index, id, **options):
         index_name = index.get_name()

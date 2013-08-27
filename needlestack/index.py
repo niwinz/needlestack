@@ -87,7 +87,8 @@ class BaseIndex(object):
 
     @opened.setter
     def opened(self, value):
-        assert isinstance(value, bool), "value must be a bool type"
+        if not isinstance(value, bool):
+            raise TypeError("value must be a bool type")
         self._meta.opened = value
 
     @classmethod

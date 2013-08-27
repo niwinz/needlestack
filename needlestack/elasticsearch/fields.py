@@ -8,21 +8,17 @@ class Field(base.Field):
 
     def __init__(self, stored=False, index_name=None, analyzed=True, term_vector="no",
                  boost=1.0, analyzer=None, index_analyzer=None, search_analyzer=None,
-                 ignore_above=None, include_in_all=True):
+                 ignore_above=None, include_in_all=True, **kwargs):
 
-        assert isinstance(stored, bool), "stored must be a bool type"
-        self.stored = stored
-
-        assert isinstance(analyzed, bool), "analyzed must be a bool type"
-        self.analyzed = analyzed
+        super(Field, self).__init__(**kwargs)
 
         assert term_vector in ["no", "yes", "with_offsets", "with_positions",
                                "with_positions_offsets"], "term_vector has invalid value"
+
         self.term_vector = term_vector
-
-        assert isinstance(boost, float) and boost > 0, "boost must be a float value"
+        self.stored = stored
+        self.analyzed = analyzed
         self.boost = boost
-
         self.index_name = index_name
         self.analyzer = analyzer
         self.index_analyzer = index_analyzer
@@ -48,6 +44,22 @@ class Field(base.Field):
             "analyzer": self.analyzer,
             "index_name": self.index_name,
             "include_in_all": self.include_in_all,
+        }
+
+        return mapping
+
+
+class IDField(base.Field):
+    def __init__(self, store=False):
+        self.store = store
+        self.index_name = "_id",
+
+    @property
+    def mapping(self):
+        mapping = {
+            "store": self.store,
+            "index": "not_analyzed",
+            "index_name": self.index_name,
         }
 
         return mapping
