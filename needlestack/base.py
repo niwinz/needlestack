@@ -95,45 +95,49 @@ class Options(object):
 
 class MetaIndex(type):
     def __new__(tcls, name, bases, attrs):
-        params = attrs.pop('_params', {})
+        options = attrs.pop('_options', {})
+        abstract = attrs.pop('_abstract', False)
+
         fields = {}
-
-        for name, field in attrs.items():
+        for _name, field in attrs.items():
             if isinstance(field, Field):
-                fields[name] = value
-                value.set_name(name)
+                fields[_name] = field
+                field.set_name(_name)
 
-        attrs["_meta"] = Options(params=params, fields=fields)
+        attrs["_meta"] = Options(options=options, fields=fields)
         cls = super(MetaIndex, tcls).__new__(tcls, name, bases, attrs)
 
-        # register index in a global namespace
-        _register_index(cls)
+        if not abstract and fields:
+            # register index in a global namespace
+            _register_index(cls)
 
         return cls
 
 
 class BaseIndex(object):
-    @property
-    def opened(self):
-        return getattr(self._meta, "opened", False)
+    _abstract = True
 
-    @opened.setter
-    def opened(self, value):
-        if not isinstance(value, bool):
-            raise TypeError("value must be a bool type")
-        self._meta.opened = value
+    @classmethod
+    def mark_opened(cls):
+        cls._meta.opened = True
+
+    @classmethod
+    def mark_closed(cls):
+        cls._meta.opened = False
+
+    @classmethod
+    def is_opened(cls):
+        return getattr(cls._meta, "opened", False)
 
     @classmethod
     def get_name(cls):
-        if "name" not in cls._meta.params:
-            cls._meta.params["name"] = utils.un_camel(cls.__name__)
-        return cls._meta.params["name"]
+        if "name" not in cls._meta.options:
+            cls._meta.options["name"] = utils.un_camel(cls.__name__)
+        return cls._meta.options["name"]
 
 
-class Index(six.with_metaclass(MetaIndex, BaseIndex)):
+class Index(BaseIndex, metaclass=MetaIndex):
     pass
-
-
 
 class SearchBackend(object):
-    pass
+        pass

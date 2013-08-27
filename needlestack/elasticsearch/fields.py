@@ -6,7 +6,7 @@ from .. import base
 class Field(base.Field):
     type = None
 
-    def __init__(self, stored=False, index_name=None, analyzed=True, term_vector="no",
+    def __init__(self, stored=True, index_name=None, analyzed=True, term_vector="no",
                  boost=1.0, analyzer=None, index_analyzer=None, search_analyzer=None,
                  ignore_above=None, include_in_all=True, **kwargs):
 
@@ -35,16 +35,23 @@ class Field(base.Field):
     def mapping(self):
         mapping = {
             "type": self.type,
-            "store": self.store,
+            "store": self.stored,
             "index": "analyzed" if self.analyzed else "not_analyzed",
             "boost": self.boost,
-            "ignore_above": self.ignore_above,
-            "search_analyzer": self.search_analyzer,
-            "index_analyzer": self.index_analyzer,
-            "analyzer": self.analyzer,
-            "index_name": self.index_name,
-            "include_in_all": self.include_in_all,
         }
+
+        if self.analyzer:
+            mapping["analyzer"] = self.analyzer
+
+        if self.index_name:
+            mapping["index_name"] = self.index_name
+
+        if self.include_in_all:
+            mapping["include_in_all"] = self.include_in_all
+
+        # "ignore_above": self.ignore_above,
+        # "search_analyzer": self.search_analyzer,
+        # "index_analyzer": self.index_analyzer,
 
         return mapping
 
@@ -52,14 +59,14 @@ class Field(base.Field):
 class IDField(base.Field):
     def __init__(self, store=False):
         self.store = store
-        self.index_name = "_id",
+        self.index_name = "_id"
 
     @property
     def mapping(self):
         mapping = {
+            "type": "string",
             "store": self.store,
             "index": "not_analyzed",
-            "index_name": self.index_name,
         }
 
         return mapping

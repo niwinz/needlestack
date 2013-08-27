@@ -2,6 +2,8 @@
 
 from __future__ import unicode_literals, absolute_import
 
+import pprint
+
 import pyelasticsearch
 import pyelasticsearch.exceptions
 
@@ -14,36 +16,40 @@ from . import fields
 # Private utils methods
 
 def _get_doc_type_from_index(index):
-    params = index._meta.params
-    if "type" in params:
-        return params["type"]
+    options = index._meta.options
+    if "type" in options:
+        return options["type"]
     return index.get_name()
 
 
 def _get_mappings_from_index(index):
-    mapping = {}
+    type_options = {"properties": {}}
 
     for field_name, field in index._meta.fields.items():
         if isinstance(field, fields.IDField):
-            field_name = "_id"
-
-        mapping[field_name] = field.mapping
+            type_options["_id"] = field.mapping
+        else:
+            type_options["properties"][field_name] = field.mapping
 
     doc_type = _get_doc_type_from_index(index)
-    return {doc_type: {"properties": mapping}}
+    return {doc_type: type_options}
 
 
 def _adapt_document_for_index(index, document):
     result_doc = {}
+    id = None
 
-    for attr_name, attr_value in document:
+    for attr_name, attr_value in document.items():
         if attr_name not in index._meta.fields:
             continue
 
-        field = index._meta.field[attr_name]
-        result_doc[field.index_name] = field.from_python(attr_value)
+        field = index._meta.fields[attr_name]
+        if isinstance(field, fields.IDField):
+            id = field.from_python(attr_value)
+        else:
+            result_doc[field.index_name] = field.from_python(attr_value)
 
-    return result_doc
+    return (id, result_doc)
 
 
 class ElasticSearch(base.SearchBackend):
@@ -66,15 +72,16 @@ class ElasticSearch(base.SearchBackend):
         """
         Method for create or update document on the
         index.
-
-        TODO: additional documentation for possible
-        options for elasticsearch search backend.
         """
 
         index_name = index.get_name()
         index_doc_type = options.pop('doc_type', _get_doc_type_from_index(index))
 
-        adapted_document = _adapt_document_for_index(index, document)
+        id, adapted_document = _adapt_document_for_index(index, document)
+
+        if id:
+            options.setdefault("id", id)
+
         self._es.index(index_name, index_doc_type, adapted_document, **options)
 
     def get(self, index, id, **options):
@@ -96,11 +103,11 @@ class ElasticSearch(base.SearchBackend):
         if settings is not None:
             options.update(settings)
 
-        final_settings = {
-            "mappings": mappings,
-            "settings": options,
-        }
+        final_settings = {"mappings": mappings}
+        if settings:
+            final_settings["settings"] = settings
 
+        #pprint.pprint(final_settings)
         try:
             self._es.create_index(index.get_name(), final_settings)
         except pyelasticsearch.exceptions.IndexAlreadyExistsError as e:
@@ -125,4 +132,7 @@ class ElasticSearch(base.SearchBackend):
             self._es.close_index(index.get_name())
 
     def search(self, query, index=None, **kwargs):
-        return self._es.search(query, index, **kwargs)
+        if index is not None and issubclass(index, base.Index):
+            index = index.get_name()
+
+        return self._es.search(query, index=index, **kwargs)

@@ -6,7 +6,7 @@ import sys
 
 from django.core.management.base import BaseCommand, CommandError
 
-from needlestack.base import _get_all_indexes
+from needlestack.base import _get_all_indexes, _load_all_indexes
 from needlestack.connection import manager
 from needlestack.exceptions import IndexAlreadyExists
 
@@ -22,8 +22,11 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         print("Syncronizing indexes...", file=sys.stderr)
 
+        _load_all_indexes()
+        indexes = _get_all_indexes()
+
         connection = manager.get_connection(options["backend"])
-        for index in _get_all_indexes()
+        for index in indexes:
             try:
                 connection.create_index(index)
                 print("Creating index '{0}'".format(index.get_name()), file=sys.stderr)
