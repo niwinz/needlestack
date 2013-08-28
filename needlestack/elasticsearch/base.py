@@ -36,7 +36,7 @@ def _get_mappings_from_index(index):
     return {doc_type: type_options}
 
 
-def _adapt_document_for_index(index, document):
+def _adapt_document_for_index(index, document, keep_id=False):
     result_doc = {}
     id = None
 
@@ -47,6 +47,9 @@ def _adapt_document_for_index(index, document):
         field = index._meta.fields[attr_name]
         if isinstance(field, fields.IDField):
             id = field.from_python(attr_value)
+            if keep_id:
+                result_doc[field.index_name] = field.from_python(attr_value)
+
         else:
             result_doc[field.index_name] = field.from_python(attr_value)
 
@@ -84,6 +87,17 @@ class ElasticSearch(base.SearchBackend):
             options.setdefault("id", id)
 
         self._es.index(index_name, index_doc_type, adapted_document, **options)
+
+    def update_bulk(self, index, documents, **options):
+        index_name = index.get_name()
+        index_doc_type = options.pop('doc_type', _get_doc_type_from_index(index))
+
+        adapted_documents = [doc for id, doc in
+                                (_adapt_document_for_index(index, doc, keep_id=True)
+                                    for doc in documents)]
+
+        self._es.bulk_index(index_name, index_doc_type, adapted_documents,
+                            id_field="_id", **options)
 
     def get(self, index, id, **options):
         index_name = index.get_name()
@@ -133,8 +147,23 @@ class ElasticSearch(base.SearchBackend):
             self._es.close_index(index.get_name())
 
     def search(self, query, index=None, **kwargs):
+        """
+        Send query to elasticsearch and return a result.
+
+        :param dict query: elasticsearch dsl query.
+        :param index.Index index: a index to use for search.
+        :param int offset: same as 'from' param of elasticsearch api.
+        :param int size: number of element to get.
+
+        :returns: search result response instance.
+        :rtype: :py:`~needlestack.elasticsearch.result.SearchResponse`
+        """
+
         if index is not None and issubclass(index, base.Index):
             index = index.get_name()
+
+        if "offset" in kwargs:
+            kwargs["es_from"] = kwargs.pop("offset")
 
         result_data = self._es.search(query, index=index, **kwargs)
         return result.SearchResponse(result_data)

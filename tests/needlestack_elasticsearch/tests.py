@@ -90,7 +90,7 @@ class IndexingDocumentsInElasticSearchTests(unittest.TestCase):
         connection = manager.get_connection()
         connection.delete_index(Index2)
 
-    def test_index_documents(self):
+    def test_index_document(self):
         connection = manager.get_connection()
 
         connection.update(Index2, {"id": "1", "content": "Kaka"})
@@ -100,3 +100,37 @@ class IndexingDocumentsInElasticSearchTests(unittest.TestCase):
 
         self.assertIsInstance(response, result.SearchResponse)
         self.assertEqual(len(response), 1)
+
+    def test_update_document(self):
+        connection = manager.get_connection()
+
+        connection.update(Index2, {"id": "1", "content": "Kaka1"})
+        connection.update(Index2, {"id": "1", "content": "Kaka2"})
+        connection.refresh(Index2)
+
+        response = connection.search({"query": {"match_all":{}}}, index=Index2)
+
+        self.assertIsInstance(response, result.SearchResponse)
+        self.assertEqual(len(response), 1)
+        self.assertEqual(response.results[0].data["content"], "Kaka2")
+
+
+class SimpleQueryDocumentsInElasticSearchTests(unittest.TestCase):
+    def setUp(self):
+        connection = manager.get_connection()
+        connection.create_index(Index2)
+
+    def tearDown(self):
+        connection = manager.get_connection()
+        connection.delete_index(Index2)
+
+    def test_match_all_with_slicing(self):
+        connection = manager.get_connection()
+
+        for i in range(30):
+            doc = {"id": "foo.{0}".format(i), "content": "kaka-{0}".format(i)}
+            connection.update(Index2, doc)
+
+        connection.refresh(Index2)
+
+        import pdb; pdb.set_trace()
