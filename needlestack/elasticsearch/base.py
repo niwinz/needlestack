@@ -11,6 +11,7 @@ from .. import base
 from .. import exceptions
 
 from . import fields
+from . import result
 
 
 # Private utils methods
@@ -135,4 +136,11 @@ class ElasticSearch(base.SearchBackend):
         if index is not None and issubclass(index, base.Index):
             index = index.get_name()
 
-        return self._es.search(query, index=index, **kwargs)
+        result_data = self._es.search(query, index=index, **kwargs)
+        return result.SearchResponse(result_data)
+
+    def refresh(self, index):
+        if issubclass(index, base.Index):
+            index = index.get_name()
+
+        self._es.refresh(index)

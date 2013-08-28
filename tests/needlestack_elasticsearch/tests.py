@@ -1,16 +1,20 @@
 # -*- coding: utf-8 -*-
 
+import pprint
 import unittest
+
 from needlestack.connections import manager
 
 from needlestack import base
 from needlestack import exceptions
 from needlestack.elasticsearch import fields
 from needlestack.elasticsearch import index
+from needlestack.elasticsearch import result
 
 
 class Index1(index.Index):
     content = fields.TextField()
+
 
 class Index2(index.Index):
     content = fields.TextField()
@@ -88,6 +92,11 @@ class IndexingDocumentsInElasticSearchTests(unittest.TestCase):
 
     def test_index_documents(self):
         connection = manager.get_connection()
-        connection.update(Index2, {"id": "1", "content": "Kaka"})
 
-        result = connection.search({"query": {"match_all":{}}}, index=Index2)
+        connection.update(Index2, {"id": "1", "content": "Kaka"})
+        connection.refresh(Index2)
+
+        response = connection.search({"query": {"match_all":{}}}, index=Index2)
+
+        self.assertIsInstance(response, result.SearchResponse)
+        self.assertEqual(len(response), 1)
