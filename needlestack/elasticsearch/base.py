@@ -16,52 +16,6 @@ from . import fields
 from . import result
 
 
-# Private utils methods
-
-def _get_doc_type_from_index(index):
-
-    if isinstance(index, six.string_types):
-        index = base.get_index_by_name(index)
-
-    options = index._meta.options
-    if "type" in options:
-        return options["type"]
-    return index.get_name()
-
-
-def _get_mappings_from_index(index):
-    type_options = {"properties": {}}
-
-    for field_name, field in index._meta.fields.items():
-        if isinstance(field, fields.IDField):
-            type_options["_id"] = field.mapping
-        else:
-            type_options["properties"][field_name] = field.mapping
-
-    doc_type = _get_doc_type_from_index(index)
-    return {doc_type: type_options}
-
-
-def _adapt_document_for_index(index, document, keep_id=False):
-    result_doc = {}
-    id = None
-
-    for attr_name, attr_value in document.items():
-        if attr_name not in index._meta.fields:
-            continue
-
-        field = index._meta.fields[attr_name]
-        if isinstance(field, fields.IDField):
-            id = field.from_python(attr_value)
-            if keep_id:
-                result_doc[field.index_name] = field.from_python(attr_value)
-
-        else:
-            result_doc[field.index_name] = field.from_python(attr_value)
-
-    return (id, result_doc)
-
-
 class ElasticSearch(base.SearchBackend):
     _es = None # ElasticSearch backend connection
     _default_settings = None # default index settings
@@ -89,9 +43,9 @@ class ElasticSearch(base.SearchBackend):
         index = base._resolve_index(index)
 
         index_name = index.get_name()
-        index_doc_type = options.pop('doc_type', _get_doc_type_from_index(index))
+        index_doc_type = options.pop('doc_type', index.get_doc_type())
 
-        id, adapted_document = _adapt_document_for_index(index, document)
+        id, adapted_document = index.adapt_document(document)
 
         if id:
             options.setdefault("id", id)
@@ -102,10 +56,10 @@ class ElasticSearch(base.SearchBackend):
         index = base._resolve_index(index)
 
         index_name = index.get_name()
-        index_doc_type = options.pop('doc_type', _get_doc_type_from_index(index))
+        index_doc_type = options.pop('doc_type', index.get_doc_type())
 
         adapted_documents = [doc for id, doc in
-                                (_adapt_document_for_index(index, doc, keep_id=True)
+                                (index.adapt_document(doc, keep_id=True)
                                     for doc in documents)]
 
         self._es.bulk_index(index_name, index_doc_type, adapted_documents,
@@ -115,7 +69,7 @@ class ElasticSearch(base.SearchBackend):
         index = base._resolve_index(index)
 
         index_name = index.get_name()
-        index_doc_type = options.pop('doc_type', _get_doc_type_from_index(index))
+        index_doc_type = options.pop('doc_type', index.get_doc_type())
         return self._es.get(index_name, index_doc_type, id, **options)
 
     def delete_index(self, index):
@@ -130,7 +84,7 @@ class ElasticSearch(base.SearchBackend):
     def create_index(self, index, settings=None):
         index = base._resolve_index(index)
 
-        mappings = _get_mappings_from_index(index)
+        mappings = index.get_mappings()
 
         options = self._default_settings.copy()
         if settings is not None:
