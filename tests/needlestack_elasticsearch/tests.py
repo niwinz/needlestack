@@ -101,6 +101,17 @@ class IndexingDocumentsInElasticSearchTests(unittest.TestCase):
         self.assertIsInstance(response, result.SearchResponse)
         self.assertEqual(len(response), 1)
 
+    def test_index_document_using_string_resolve(self):
+        connection = manager.get_connection()
+
+        connection.update("index2", {"id": "1", "content": "Kaka"})
+        connection.refresh("index2")
+
+        response = connection.search({"query": {"match_all":{}}}, index="index2")
+
+        self.assertIsInstance(response, result.SearchResponse)
+        self.assertEqual(len(response), 1)
+
     def test_update_document(self):
         connection = manager.get_connection()
 

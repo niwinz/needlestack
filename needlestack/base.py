@@ -3,6 +3,7 @@
 from __future__ import unicode_literals, absolute_import
 
 from importlib import import_module
+import inspect
 
 from django.conf import settings
 from django.utils import six
@@ -39,10 +40,23 @@ def _load_all_indexes():
     _indexes_loaded = True
 
 
-def _get_index(name):
+def _resolve_index(index):
+    if index is None:
+        return index
+    elif isinstance(index, six.string_types):
+        return get_index_by_name(index)
+    elif inspect.isclass(index):
+        if issubclass(index, Index):
+            return index
+
+    raise TypeError("invalid type for index parameter")
+
+
+def get_index_by_name(name):
     if name not in _indexes:
         raise exceptions.IndextDoesNotExists("{0} does not exists".format(name))
     return _indexes[name]
+
 
 
 class Field(object):

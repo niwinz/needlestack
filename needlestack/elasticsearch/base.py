@@ -4,6 +4,8 @@ from __future__ import unicode_literals, absolute_import
 
 import pprint
 
+from django.utils import six
+
 import pyelasticsearch
 import pyelasticsearch.exceptions
 
@@ -17,6 +19,10 @@ from . import result
 # Private utils methods
 
 def _get_doc_type_from_index(index):
+
+    if isinstance(index, six.string_types):
+        index = base.get_index_by_name(index)
+
     options = index._meta.options
     if "type" in options:
         return options["type"]
@@ -65,6 +71,8 @@ class ElasticSearch(base.SearchBackend):
         self._es = pyelasticsearch.ElasticSearch(urls, *args, **kwargs)
 
     def get_data_from_model(self, index, model):
+        index = base._resolve_index(index)
+
         data = {}
 
         for field_name in index._meta.fields:
@@ -78,6 +86,8 @@ class ElasticSearch(base.SearchBackend):
         index.
         """
 
+        index = base._resolve_index(index)
+
         index_name = index.get_name()
         index_doc_type = options.pop('doc_type', _get_doc_type_from_index(index))
 
@@ -89,6 +99,8 @@ class ElasticSearch(base.SearchBackend):
         self._es.index(index_name, index_doc_type, adapted_document, **options)
 
     def update_bulk(self, index, documents, **options):
+        index = base._resolve_index(index)
+
         index_name = index.get_name()
         index_doc_type = options.pop('doc_type', _get_doc_type_from_index(index))
 
@@ -100,11 +112,15 @@ class ElasticSearch(base.SearchBackend):
                             id_field="_id", **options)
 
     def get(self, index, id, **options):
+        index = base._resolve_index(index)
+
         index_name = index.get_name()
         index_doc_type = options.pop('doc_type', _get_doc_type_from_index(index))
         return self._es.get(index_name, index_doc_type, id, **options)
 
     def delete_index(self, index):
+        index = base._resolve_index(index)
+
         index_name = index.get_name()
         try:
             self._es.delete_index(index_name)
@@ -112,6 +128,8 @@ class ElasticSearch(base.SearchBackend):
             raise exceptions.IndextDoesNotExists("{0} not found".format(index_name)) from e
 
     def create_index(self, index, settings=None):
+        index = base._resolve_index(index)
+
         mappings = _get_mappings_from_index(index)
 
         options = self._default_settings.copy()
@@ -132,6 +150,7 @@ class ElasticSearch(base.SearchBackend):
         """
         Method that open an index.
         """
+        index = base._resolve_index(index)
 
         if not index.opened:
             index.opened = True
@@ -141,6 +160,7 @@ class ElasticSearch(base.SearchBackend):
         """
         Method that closes an index.
         """
+        index = base._resolve_index(index)
 
         if index.opened:
             index.opened = False
@@ -159,7 +179,9 @@ class ElasticSearch(base.SearchBackend):
         :rtype: :py:`~needlestack.elasticsearch.result.SearchResponse`
         """
 
-        if index is not None and issubclass(index, base.Index):
+        index = base._resolve_index(index)
+
+        if index is not None:
             index = index.get_name()
 
         if "offset" in kwargs:
@@ -169,7 +191,5 @@ class ElasticSearch(base.SearchBackend):
         return result.SearchResponse(result_data)
 
     def refresh(self, index):
-        if issubclass(index, base.Index):
-            index = index.get_name()
-
-        self._es.refresh(index)
+        index = base._resolve_index(index)
+        self._es.refresh(index.get_name())
