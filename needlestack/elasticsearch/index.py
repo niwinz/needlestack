@@ -21,8 +21,8 @@ class Index(base.Index):
         type_options = {"properties": {}}
 
         for field_name, field in cls._meta.fields.items():
-            if isinstance(field, fields.IDField):
-                type_options["_id"] = field.mapping
+            if field.index_name.startswith("_"):
+                type_options[field.index_name] = field.mapping
             else:
                 type_options["properties"][field_name] = field.mapping
 

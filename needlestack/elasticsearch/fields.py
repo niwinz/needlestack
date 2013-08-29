@@ -4,9 +4,10 @@ from .. import base
 
 
 class Field(base.Field):
+    index_name = None
     type = None
 
-    def __init__(self, stored=True, index_name=None, analyzed=True, term_vector="no",
+    def __init__(self, store=True, index_name=None, analyzed=True, term_vector="no",
                  boost=1.0, analyzer=None, index_analyzer=None, search_analyzer=None,
                  ignore_above=None, include_in_all=True, **kwargs):
 
@@ -16,7 +17,7 @@ class Field(base.Field):
                                "with_positions_offsets"], "term_vector has invalid value"
 
         self.term_vector = term_vector
-        self.stored = stored
+        self.store = store
         self.analyzed = analyzed
         self.boost = boost
         self.index_name = index_name
@@ -35,7 +36,7 @@ class Field(base.Field):
     def mapping(self):
         mapping = {
             "type": self.type,
-            "store": self.stored,
+            "store": self.store,
             "index": "analyzed" if self.analyzed else "not_analyzed",
             "boost": self.boost,
         }
@@ -56,6 +57,8 @@ class Field(base.Field):
         return mapping
 
 
+# Special fields
+
 class IDField(base.Field):
     def __init__(self, store=False):
         self.store = store
@@ -71,6 +74,19 @@ class IDField(base.Field):
 
         return mapping
 
+
+class TypeField(base.Field):
+    def __init__(self, store=True):
+        self.store = store
+        self.index_name = "_type"
+
+    @property
+    def mapping(self):
+        mapping = {"store": self.store}
+        return mapping
+
+
+# Standard fields
 
 class TextField(Field):
     type = "string"
