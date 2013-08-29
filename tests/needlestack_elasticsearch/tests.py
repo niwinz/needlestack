@@ -133,4 +133,6 @@ class SimpleQueryDocumentsInElasticSearchTests(unittest.TestCase):
 
         connection.refresh(Index2)
 
-        import pdb; pdb.set_trace()
+        response = connection.search({"query":{"match_all":{}}},  size=2, index=Index2)
+        self.assertEqual(len(response), 2)
+        self.assertEqual(response.total_results, 30)
