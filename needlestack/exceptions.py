@@ -4,7 +4,7 @@ class NeedleStackException(Exception):
     pass
 
 
-class IndextDoesNotExists(NeedleStackException):
+class IndexDoesNotExists(NeedleStackException):
     pass
 
 

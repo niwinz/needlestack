@@ -79,7 +79,7 @@ class ElasticSearch(base.SearchBackend):
         try:
             self._es.delete_index(index_name)
         except pyelasticsearch.exceptions.ElasticHttpNotFoundError as e:
-            raise exceptions.IndextDoesNotExists("{0} not found".format(index_name)) from e
+            raise exceptions.IndexDoesNotExists("{0} not found".format(index_name)) from e
 
     def create_index(self, index, settings=None):
         index = base._resolve_index(index)
