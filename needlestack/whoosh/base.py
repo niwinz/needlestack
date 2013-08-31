@@ -14,7 +14,7 @@ from .. import utils
 from .. import exceptions
 
 from . import fields
-from . import result
+#from . import result
 
 
 class Whoosh(base.SearchBackend):
