@@ -1,73 +1,42 @@
 # -*- coding: utf-8 -*-
 
+from django.utils.functional import cached_property
 from .. import base
+
+from whoosh import fields
 
 
 class Field(base.Field):
     type = None
+    default_kwargs = None
 
-    def __init__(self, stored=False, index_name=None, analyzed=True, term_vector="no",
-                 boost=1.0, analyzer=None, index_analyzer=None, search_analyzer=None,
-                 ignore_above=None, include_in_all=True):
+    def __init__(self, *args, **kwargs):
+        self._args = args
+        self._kwargs = kwargs
 
-        assert isinstance(stored, bool), "stored must be a bool type"
-        self.stored = stored
+    @cached_property
+    def native_type(self)
+        if self.type is None:
+            raise RuntimeError("type attr can not be None")
 
-        assert isinstance(analyzed, bool), "analyzed must be a bool type"
-        self.analyzed = analyzed
+        if self.default_kwargs is not None:
+            self._kwargs.update(self.default_kwargs)
 
-        assert term_vector in ["no", "yes", "with_offsets", "with_positions",
-                               "with_positions_offsets"], "term_vector has invalid value"
-        self.term_vector = term_vector
-
-        assert isinstance(boost, float) and boost > 0, "boost must be a float value"
-        self.boost = boost
-
-        self.index_name = index_name
-        self.analyzer = analyzer
-        self.index_analyzer = index_analyzer
-        self.search_analyzer = search_analyzer
-        self.ignore_above = ignore_above
-        self.include_in_all = include_in_all
-
-    def set_name(self, name):
-        if self.index_name is None:
-            self.index_name = name
-        super(Field, self).set_name(name)
-
-    @property
-    def mapping(self):
-        mapping = {
-            "type": self.type,
-            "store": self.store,
-            "index": "analyzed" if self.analyzed else "not_analyzed",
-            "boost": self.boost,
-            "ignore_above": self.ignore_above,
-            "search_analyzer": self.search_analyzer,
-            "index_analyzer": self.index_analyzer,
-            "analyzer": self.analyzer,
-            "index_name": self.index_name,
-            "include_in_all": self.include_in_all,
-        }
-
-        return mapping
+        return self.type(*self._args, **self._kwargs)
 
 
 class TextField(Field):
-    type = "string"
+    type = fields.TEXT
 
 
 class IntegerField(Field):
-    type = "long"
+    type = fields.NUMERIC
 
 
 class FloatField(Field):
-    type = "double"
+    type = fields.NUMERIC
+    default_kwargs = {"numtype": float}
 
 
 class BooleanField(Field):
-    type = "boolean"
-
-
-class ArrayField(Field):
-    type = "array"
+    type = fields.BOOLEAN
