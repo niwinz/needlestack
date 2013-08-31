@@ -1,5 +1,5 @@
 ===========
-NeedleStack
+needlestack
 ===========
 
 Modular search for Django (django-haystack alternative).
