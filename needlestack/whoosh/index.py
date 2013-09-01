@@ -3,36 +3,27 @@
 from .. import base
 from . import fields
 
-from whoosh import qparser
+from whoosh.fields import Schema
 
 
 class Index(base.Index):
     @classmethod
     def get_mappings(cls):
-        pass
+        attrs = {}
+        for field_name, field in cls._meta.fields.items():
+            attrs[field_name] = field.native_type
+
+        return Schema(**attrs)
 
     @classmethod
-    def adapt_document(cls, document, keep_id=False):
+    def adapt_document(cls, document):
         result_doc = {}
 
         for attr_name, attr_value in document.items():
-            if attr_name not in cls._meta.fields:
-                continue
+            if ((attr_name.startswith("_stored_") and attr_name[8:] in cls._meta.fields)
+                    or attr_name in cls._meta.fields):
 
-            field = cls._meta.fields[attr_name]
-            if isinstance(field, fields.IDField):
-                id = field.from_python(attr_value)
-                if keep_id:
-                    result_doc[field.index_name] = field.from_python(attr_value)
-
-            else:
-                result_doc[field.index_name] = field.from_python(attr_value)
+                field = cls._meta.fields[attr_name]
+                result_doc[field.name] = field.from_python(attr_value)
 
         return result_doc
-
-    def make_query(cls, fields, term, **kwargs):
-        """
-        Shortcut method for create search query object.
-        """
-        parser = qparser.MultifieldParser(fieldnames=fields, **kwargs)
-        return parser.parse(term)
