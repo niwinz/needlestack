@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals, absolute_import
+
+from whoosh.fields import Schema
+
 from .. import base
 from . import fields
 
-from whoosh.fields import Schema
 
 
 class Index(base.Index):
