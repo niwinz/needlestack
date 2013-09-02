@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from django.utils.functional import cached_property
-from .. import base
-
 from whoosh import fields
+
+from .. import base
 
 
 class Field(base.Field):
