@@ -5,7 +5,7 @@ Modular search api for Django.
 
 .. note::
 
-    This package experiment and does not have stable code.
+    This package is an experiment and does not have stable code.
 
 
 This package is like django-haystack but significant differences on the philosofy. One of main
