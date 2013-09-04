@@ -34,7 +34,7 @@ def sync_indexes(backend="default", verbosity=0):
                 print("Index '{0}' already exists.".format(index.get_name()), file=sys.stderr)
 
 
-def drop_indexes(backend="default", verbosity=0):
+def drop_indexes(backend="default", verbosity=0, all=False):
     """
     Delete all registred indexes from backend.
     """
@@ -44,14 +44,17 @@ def drop_indexes(backend="default", verbosity=0):
 
     connection = manager.get_connection(backend)
 
-    _load_all_indexes()
-    indexes = _get_all_indexes()
+    if all:
+        connection.delete_all_indexes()
+    else:
+        _load_all_indexes()
+        indexes = _get_all_indexes()
 
-    for index in indexes:
-        try:
-            connection.drop_index(index)
-            if verbosity > 0:
-                print("Deleting index '{0}'".format(index.get_name()), file=sys.stderr)
-        except IndexDoesNotExists:
-            if verbosity > 0:
-                print("Index '{0}' does not exist.".format(index.get_name()), file=sys.stderr)
+        for index in indexes:
+            try:
+                connection.drop_index(index)
+                if verbosity > 0:
+                    print("Deleting index '{0}'".format(index.get_name()), file=sys.stderr)
+            except IndexDoesNotExists:
+                if verbosity > 0:
+                    print("Index '{0}' does not exist.".format(index.get_name()), file=sys.stderr)
