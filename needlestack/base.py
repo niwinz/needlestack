@@ -90,7 +90,6 @@ class Field(object):
         return value
 
 
-
 class Options(object):
     """
     Simple class for store some metadata
@@ -152,6 +151,7 @@ class BaseIndex(object):
 
 class Index(BaseIndex, metaclass=MetaIndex):
     pass
+
 
 class SearchBackend(object):
         pass

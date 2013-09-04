@@ -58,7 +58,7 @@ class Whoosh(base.SearchBackend):
     def update_bulk(self, index, documents):
         index = base._resolve_index(index)
 
-        index.ix = storage.open_index(indexname=index.get_name())
+        ix = storage.open_index(indexname=index.get_name())
         writer = AsyncWriter(ix)
 
         adapted_documents = (index.adapt_document(doc)
