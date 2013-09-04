@@ -39,9 +39,8 @@ class Whoosh(base.SearchBackend):
         return self._storage.create_index(indexname=index.get_name(),
                                           schema=index.get_schema())
     def delete_index(self, index):
-        # Whoosh does not implement individual index removing
-        # mechanism
-        pass
+        raise NotImplemetedError("whoosh does not have support for "
+                                 "delete individual indexes")
 
     def delete_all_indexes(self):
         self._storage.clean()
