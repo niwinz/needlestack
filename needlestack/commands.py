@@ -3,6 +3,7 @@
 from __future__ import unicode_literals, print_function, absolute_import
 
 import sys
+import warnings
 
 from needlestack.base import _get_all_indexes, _load_all_indexes
 from needlestack.connection import manager
@@ -27,14 +28,13 @@ def sync_indexes(backend="default", verbosity=0, **kwargs):
     Synchronize all registred indexes to backend.
     """
 
+    manager = kwargs["manager"]
+
     if verbosity >= _min_verbosity_level:
         print("Syncronizing indexes...", file=sys.stderr)
 
-    _load_all_indexes()
-    indexes = _get_all_indexes()
-
     connection = manager.get_connection(backend)
-    for index in indexes:
+    for index in manager.get_all_indexes():
         try:
             connection.create_index(index)
             if verbosity > 0:
@@ -56,18 +56,22 @@ def drop_indexes(index=None, drop_all=False, backend="default", verbosity=0, **k
     :param verbosity: what verbosity set for this command execution
     """
 
+    manager = kwargs["manager"]
+
     if verbosity >= _min_verbosity_level:
         print("Droping all registred indexes from current backend...", file=sys.stderr)
 
     connection = manager.get_connection(backend)
+    if connection.vendor == "whoosh":
+        warning_msg = ("Whoosh backend does not support real drop index command. "
+                       "Alternatively it clears index content but does not eliminate it. "
+                       "For real droping whoosh indexes, remove the index directory.")
+        warnings.warn(warning_msg, DeprecationWarning)
 
-    if all:
+    if drop_all:
         connection.delete_all_indexes()
     else:
-        _load_all_indexes()
-        indexes = _get_all_indexes()
-
-        for index in indexes:
+        for index in manager.get_all_indexes():
             try:
                 connection.drop_index(index)
                 if verbosity > 0:
