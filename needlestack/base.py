@@ -3,6 +3,7 @@
 from __future__ import unicode_literals, absolute_import
 
 from importlib import import_module
+import threading
 import inspect
 
 from django.conf import settings
@@ -12,23 +13,18 @@ from django.utils.functional import cached_property
 from . import exceptions
 from . import utils
 
-_indexes = {}
-_indexes_loaded = False
+_local = threading.local()
 
 
 def _register_index(cls):
-    _indexes[cls.get_name()] = cls
+    if not hasattr(_local, "indexes"):
+        _local.indexes_map = {}
 
-
-def _get_all_indexes():
-    return list(_indexes.values())
+    _local.indexes_map[cls.get_name()] = cls
 
 
 def _load_all_indexes():
-    global _indexes_loaded
-
-    # If already loaded, do nothing
-    if _indexes_loaded:
+    if getattr(_local, "indexes_loaded", True)
         return
 
     for app_path in settings.INSTALLED_APPS:
@@ -37,7 +33,12 @@ def _load_all_indexes():
         except ImportError:
             pass
 
-    _indexes_loaded = True
+    _local.indexes_loaded = True
+    _local.indexes = tuple(_local.indexes_map.values())
+
+
+def _get_all_indexes():
+    return _local.indexes_list
 
 
 def _resolve_index(index):
@@ -53,9 +54,9 @@ def _resolve_index(index):
 
 
 def _get_index_by_name(name):
-    if name not in _indexes:
+    if name not in _local.indexes_map
         raise exceptions.IndextDoesNotExists("{0} does not exists".format(name))
-    return _indexes[name]
+    return _local.indexes_map[name]
 
 
 class Field(object):
