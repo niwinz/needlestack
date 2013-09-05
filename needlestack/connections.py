@@ -11,6 +11,14 @@ from . import base
 
 
 class ConnectionManager(object):
+    __instance = None
+
+    # Make this class as singleton
+    def __new__(cls):
+        if self.__instance is None:
+            self.__instance = super(ConnectionManager, cls).__new__(cls)
+        return self.__instance
+
     def __init__(self):
         self._connections = local()
 
