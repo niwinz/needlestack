@@ -42,6 +42,9 @@ class ConnectionManager(object):
         if hasattr(self._connections, alias):
             return getattr(self._connections, alias)
 
+        # Implicit index loading on new connection is created
+        base._load_all_indexes()
+
         cls, params = self.load_backend(alias)
         instance = cls(**params)
 
