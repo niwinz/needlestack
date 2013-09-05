@@ -12,9 +12,9 @@ from whoosh.writing import AsyncWriter
 from .. import base
 from .. import utils
 from .. import exceptions
+from .. import connection
 
 from . import fields
-#from . import result
 
 
 class Whoosh(base.SearchBackend):
@@ -23,9 +23,12 @@ class Whoosh(base.SearchBackend):
     def __init__(self, storage='whoosh.filedb.filestore.FileStorage',
                  *args, **kwargs):
 
+        self.manager = connection.ConnectionManager()
+
         storage_cls = utils.load_class(storage)
         self._storage = storage_cls(*args, **kwargs)
         self._storage.create()
+
 
     def exists_index(self, index):
         index = base._resolve_index(index)
