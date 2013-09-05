@@ -18,6 +18,8 @@ from . import fields
 
 
 class Whoosh(base.SearchBackend):
+    vendor = "whoosh"
+
     def __init__(self, storage='whoosh.filedb.filestore.FileStorage',
                  *args, **kwargs):
 

@@ -17,6 +17,8 @@ from . import result
 
 
 class ElasticSearch(base.SearchBackend):
+    vendor = "elasticsearch"
+
     _es = None # ElasticSearch backend connection
     _default_settings = None # default index settings
 
