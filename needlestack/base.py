@@ -44,7 +44,7 @@ def _resolve_index(index):
     if index is None:
         return index
     elif isinstance(index, six.string_types):
-        return get_index_by_name(index)
+        return _get_index_by_name(index)
     elif inspect.isclass(index):
         if issubclass(index, Index):
             return index
@@ -52,11 +52,10 @@ def _resolve_index(index):
     raise TypeError("invalid type for index parameter")
 
 
-def get_index_by_name(name):
+def _get_index_by_name(name):
     if name not in _indexes:
         raise exceptions.IndextDoesNotExists("{0} does not exists".format(name))
     return _indexes[name]
-
 
 
 class Field(object):
