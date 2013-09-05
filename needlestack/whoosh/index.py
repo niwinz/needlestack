@@ -9,7 +9,7 @@ from . import fields
 
 class Index(base.Index):
     @classmethod
-    def get_mappings(cls):
+    def get_schema(cls):
         attrs = {}
         for field_name, field in cls._meta.fields.items():
             attrs[field_name] = field.native_type
@@ -28,3 +28,7 @@ class Index(base.Index):
                 result_doc[field.name] = field.from_python(attr_value)
 
         return result_doc
+
+    @classmethod
+    def get_searchable_fieldnames(cls):
+        return tuple(cls._meta.fields.keys())

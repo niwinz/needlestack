@@ -9,8 +9,6 @@ from needlestack import base
 from needlestack import exceptions
 from needlestack.whoosh import fields
 from needlestack.whoosh import index
-#from needlestack.whoosh import result
-
 
 class Index1(index.Index):
     content = fields.TextField()
@@ -41,62 +39,36 @@ class BasicTests(unittest.TestCase):
             connection = manager.get_connection("inexistent")
 
 
-# class BasicIndexClassTests(unittest.TestCase):
-#     def test_index_name(self):
-#         class SomeIndex1(base.Index):
-#             _options = {"name": "some_index"}
-#
-#         class SomeIndex2(base.Index):
-#             pass
-#
-#         self.assertEqual(SomeIndex1.get_name(), "some_index")
-#         self.assertEqual(SomeIndex2.get_name(), "some_index2")
-#
-#     def test_opened_methods(self):
-#         class SomeIndex(base.Index):
-#             pass
-#
-#         SomeIndex.__name__ = "SomeIndex"
-#
-#         self.assertFalse(SomeIndex.is_opened())
-#
-#         SomeIndex.mark_opened()
-#         self.assertTrue(SomeIndex.is_opened())
-#
-#         SomeIndex.mark_closed()
-#         self.assertFalse(SomeIndex.is_opened())
-#
-#
-# class IndexElasticSearchTests(unittest.TestCase):
-#     def test_create_destroy_index(self):
-#         connection = manager.get_connection()
-#         connection.create_index(Index1)
-#
-#         with self.assertRaises(exceptions.IndexAlreadyExists):
-#             connection.create_index(Index1)
-#
-#         connection.delete_index(Index1)
-#
-#
-# class IndexingDocumentsInElasticSearchTests(unittest.TestCase):
-#     def setUp(self):
-#         connection = manager.get_connection()
-#         connection.create_index(Index2)
-#
-#     def tearDown(self):
-#         connection = manager.get_connection()
-#         connection.delete_index(Index2)
-#
-#     def test_index_document(self):
-#         connection = manager.get_connection()
-#
-#         connection.update(Index2, {"id": "1", "content": "Kaka"})
-#         connection.refresh(Index2)
-#
-#         response = connection.search({"query": {"match_all":{}}}, index=Index2)
-#
-#         self.assertIsInstance(response, result.SearchResponse)
-#         self.assertEqual(len(response), 1)
+class IndexWhooshTests(unittest.TestCase):
+    def test_create_destroy_index(self):
+        connection = manager.get_connection()
+
+        import pdb; pdb.set_trace()
+        connection.create_index(Index1)
+
+        with self.assertRaises(exceptions.IndexAlreadyExists):
+            connection.create_index(Index1)
+
+        connection.delete_index(Index1)
+
+
+class IndexingDocumentsInWhooshTests(unittest.TestCase):
+    def setUp(self):
+        connection = manager.get_connection()
+        connection.delete_all_indexes()
+        connection.create_index(Index2)
+
+    def tearDown(self):
+        connection = manager.get_connection()
+        connection.delete_all_indexes()
+
+    def test_index_document(self):
+        connection = manager.get_connection()
+
+        connection.update(Index2, {"id": "1", "content": "Kaka"})
+
+        response = connection.search("Kaka", index=Index2)
+        #self.assertEqual(len(response), 1)
 #
 #     def test_index_document_using_string_resolve(self):
 #         connection = manager.get_connection()

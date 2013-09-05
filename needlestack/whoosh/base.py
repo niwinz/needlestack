@@ -7,6 +7,7 @@ import os.path
 
 from django.utils import six
 from whoosh import filedb
+from whoosh.qparser import MultifieldParser
 from whoosh.writing import AsyncWriter
 
 from .. import base
@@ -54,17 +55,17 @@ class Whoosh(base.SearchBackend):
     def update(self, index, document, **options):
         index = base._resolve_index(index)
 
-        ix = storage.open_index(indexname=index.get_name())
+        ix = self._storage.open_index(indexname=index.get_name())
         writer = AsyncWriter(ix)
 
         adapted_document = index.adapt_document(document)
-        writer.update_document(**adapt_document)
+        writer.update_document(**adapted_document)
         writer.commit()
 
     def update_bulk(self, index, documents):
         index = base._resolve_index(index)
 
-        ix = storage.open_index(indexname=index.get_name())
+        ix = self._storage.open_index(indexname=index.get_name())
         writer = AsyncWriter(ix)
 
         adapted_documents = (index.adapt_document(doc)
@@ -83,6 +84,7 @@ class Whoosh(base.SearchBackend):
         query = parser.parse(query_string)
         return self._search(query, index, **kwargs)
 
-    def _search(self, query, index, method="search"):
-        with index.get_searcher() as searcher:
+    def _search(self, query, index, method="search", **kwargs):
+        ix = self._storage.open_index(indexname=index.get_name())
+        with ix.searcher() as searcher:
             return getattr(searcher, method)(query, **kwargs)
