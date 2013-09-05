@@ -12,7 +12,17 @@ from needlestack.exceptions import (IndexAlreadyExists,
 _min_verbosity_level = 1
 
 
-def sync_indexes(backend="default", verbosity=0):
+def command(func):
+    @functools.wraps(func)
+    def _decorator(*args, **kwargs):
+        # Inject manager as kwargs
+        kwargs["manager"] = manager
+        return func(*args, **kwargs)
+    return _decorator
+
+
+@command
+def sync_indexes(backend="default", verbosity=0, **kwargs):
     """
     Synchronize all registred indexes to backend.
     """
@@ -34,9 +44,16 @@ def sync_indexes(backend="default", verbosity=0):
                 print("Index '{0}' already exists.".format(index.get_name()), file=sys.stderr)
 
 
-def drop_indexes(backend="default", verbosity=0, all=False):
+@command
+def drop_indexes(index=None, drop_all=False, backend="default", verbosity=0, **kwargs):
     """
     Delete all registred indexes from backend.
+
+    :param str/list index: pass a list or one index for drop one concrete index.
+    :param bool drop_all: run drop all available indexes (not only registred)
+
+    :param backend: what backend use for execute this command
+    :param verbosity: what verbosity set for this command execution
     """
 
     if verbosity >= _min_verbosity_level:
