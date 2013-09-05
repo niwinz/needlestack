@@ -15,9 +15,9 @@ class ConnectionManager(object):
 
     # Make this class as singleton
     def __new__(cls):
-        if self.__instance is None:
-            self.__instance = super(ConnectionManager, cls).__new__(cls)
-        return self.__instance
+        if cls.__instance is None:
+            cls.__instance = super(ConnectionManager, cls).__new__(cls)
+        return cls.__instance
 
     def __init__(self):
         self._connections = local()

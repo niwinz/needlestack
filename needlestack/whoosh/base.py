@@ -12,7 +12,7 @@ from whoosh.writing import AsyncWriter
 from .. import base
 from .. import utils
 from .. import exceptions
-from .. import connection
+from .. import connections
 
 from . import fields
 
@@ -23,7 +23,7 @@ class Whoosh(base.SearchBackend):
     def __init__(self, storage='whoosh.filedb.filestore.FileStorage',
                  *args, **kwargs):
 
-        self.manager = connection.ConnectionManager()
+        self.manager = connections.ConnectionManager()
 
         storage_cls = utils.load_class(storage)
         self._storage = storage_cls(*args, **kwargs)

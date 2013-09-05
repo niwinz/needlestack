@@ -24,7 +24,7 @@ def _register_index(cls):
 
 
 def _load_all_indexes():
-    if getattr(_local, "indexes_loaded", True)
+    if getattr(_local, "indexes_loaded", True):
         return
 
     for app_path in settings.INSTALLED_APPS:
@@ -54,7 +54,7 @@ def _resolve_index(index):
 
 
 def _get_index_by_name(name):
-    if name not in _local.indexes_map
+    if name not in _local.indexes_map:
         raise exceptions.IndextDoesNotExists("{0} does not exists".format(name))
     return _local.indexes_map[name]
 
