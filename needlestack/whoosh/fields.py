@@ -36,6 +36,7 @@ class KeyworkdField(Field):
 
 class TextField(Field):
     type = fields.TEXT
+    default_kwargs = {"stored": True}
 
 
 class IntegerField(Field):
