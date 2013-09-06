@@ -43,7 +43,6 @@ class IndexWhooshTests(unittest.TestCase):
     def test_create_destroy_index(self):
         connection = manager.get_connection()
 
-        import pdb; pdb.set_trace()
         connection.create_index(Index1)
 
         with self.assertRaises(exceptions.IndexAlreadyExists):
