@@ -98,7 +98,7 @@ class IndexingDocumentsInElasticSearchTests(unittest.TestCase):
 
         response = connection.search({"query": {"match_all":{}}}, index=Index2)
 
-        self.assertIsInstance(response, result.SearchResponse)
+        self.assertIsInstance(response, result.SearchResult)
         self.assertEqual(len(response), 1)
 
     def test_index_document_using_string_resolve(self):
@@ -109,7 +109,7 @@ class IndexingDocumentsInElasticSearchTests(unittest.TestCase):
 
         response = connection.search({"query": {"match_all":{}}}, index="index2")
 
-        self.assertIsInstance(response, result.SearchResponse)
+        self.assertIsInstance(response, result.SearchResult)
         self.assertEqual(len(response), 1)
 
     def test_update_document(self):
@@ -121,7 +121,7 @@ class IndexingDocumentsInElasticSearchTests(unittest.TestCase):
 
         response = connection.search({"query": {"match_all":{}}}, index=Index2)
 
-        self.assertIsInstance(response, result.SearchResponse)
+        self.assertIsInstance(response, result.SearchResult)
         self.assertEqual(len(response), 1)
         self.assertEqual(response.results[0].data["content"], "Kaka2")
 

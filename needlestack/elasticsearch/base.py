@@ -135,7 +135,7 @@ class ElasticSearch(base.SearchBackend):
         :param int size: number of element to get.
 
         :returns: search result response instance.
-        :rtype: :py:`~needlestack.elasticsearch.result.SearchResponse`
+        :rtype: :py:`~needlestack.elasticsearch.result.SearchResult`
         """
 
         index = base._resolve_index(index)
@@ -147,7 +147,7 @@ class ElasticSearch(base.SearchBackend):
             kwargs["es_from"] = kwargs.pop("offset")
 
         result_data = self._es.search(query, index=index, **kwargs)
-        return result.SearchResponse(result_data)
+        return result.SearchResult(result_data)
 
     def refresh(self, index):
         index = base._resolve_index(index)

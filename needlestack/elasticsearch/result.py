@@ -5,7 +5,7 @@ from __future__ import absolute_import, unicode_literals
 from django.utils.functional import cached_property
 
 
-class SearchResult(object):
+class ResultItem(object):
     def __init__(self, result):
         self._result = result
 
@@ -39,7 +39,7 @@ class SearchResult(object):
         return self._result["_type"]
 
 
-class SearchResponse(object):
+class SearchResult(object):
     def __init__(self, result):
         self._result = result
 
@@ -72,4 +72,4 @@ class SearchResponse(object):
 
     def iter_results(self):
         for hit in self._result["hits"]["hits"]:
-            yield SearchResult(hit)
+            yield ResultItem(hit)
