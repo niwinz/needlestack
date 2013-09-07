@@ -20,7 +20,7 @@ class SearchResult(object):
         elif "fields" in self._result:
             return self._result["fields"]
 
-        raise RuntimeError("This result object does not have valid data")
+        raise ValueError("This result object does not have valid data")
 
     @property
     def score(self):
