@@ -37,3 +37,4 @@ Supported backends and their documentation:
     :maxdepth: 1
 
     elasticsearch/index
+    whoosh/index
