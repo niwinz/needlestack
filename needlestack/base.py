@@ -38,10 +38,21 @@ def _load_all_indexes():
 
 
 def _get_all_indexes():
+    """
+    Return a list of all registred indexes.
+
+    :rtype: list
+    """
     return _local.indexes_list
 
 
 def _resolve_index(index):
+    """
+    Method that always return None or Index
+    class. Also, can raise TypeError if incompatible
+    type parameter is found.
+    """
+
     if index is None:
         return index
     elif isinstance(index, six.string_types):
@@ -54,6 +65,13 @@ def _resolve_index(index):
 
 
 def _get_index_by_name(name):
+    """
+    Obtain index instance resolving it by it's name.
+
+    :param str name: index name.
+    :rtype: subclass of :py:class:`~needlestack.base.Index`
+    """
+
     if name not in _local.indexes_map:
         raise exceptions.IndextDoesNotExists("{0} does not exists".format(name))
     return _local.indexes_map[name]
