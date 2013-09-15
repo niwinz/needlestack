@@ -27,7 +27,8 @@ class Field(base.Field):
 
 class IDField(Field):
     type = fields.ID
-    default_kwargs = {"stored": True}
+    default_kwargs = {"stored": True,
+                      "unique": True}
 
 
 class KeyworkdField(Field):

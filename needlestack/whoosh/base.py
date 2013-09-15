@@ -16,7 +16,7 @@ from .. import exceptions
 from .. import connections
 
 from . import fields
-
+from . import result
 
 class Whoosh(base.SearchBackend):
     vendor = "whoosh"
@@ -86,5 +86,7 @@ class Whoosh(base.SearchBackend):
 
     def _search(self, query, index, method="search", **kwargs):
         ix = self._storage.open_index(indexname=index.get_name())
+
         with ix.searcher() as searcher:
-            return getattr(searcher, method)(query, **kwargs)
+            raw_result = getattr(searcher, method)(query, **kwargs)
+            return result.SearchResult(raw_result)
