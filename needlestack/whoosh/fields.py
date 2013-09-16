@@ -57,3 +57,13 @@ class BooleanField(Field):
 
 class DateTimeField(Field):
     type = fields.DATETIME
+
+
+class NGramField(Field):
+    type = fields.NGRAM
+    default_kwargs = {"stored": True}
+
+
+class NGramWordsField(Field):
+    type = fields.NGRAMWORDS
+    default_kwargs = {"stored": True}
