@@ -30,7 +30,6 @@ class Whoosh(base.SearchBackend):
         self._storage = storage_cls(*args, **kwargs)
         self._storage.create()
 
-
     def exists_index(self, index):
         index = base._resolve_index(index)
         return self._storage.index_exists(index.get_name())
