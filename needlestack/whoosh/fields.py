@@ -33,6 +33,8 @@ class IDField(Field):
 
 class KeyworkdField(Field):
     type = fields.KEYWORD
+    default_kwargs = {"stored": True,
+                      "commas": True}
 
 
 class TextField(Field):
