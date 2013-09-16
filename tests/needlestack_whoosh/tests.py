@@ -3,12 +3,14 @@
 import pprint
 import unittest
 
-from needlestack.connections import manager
+from whoosh import qparser
 
 from needlestack import base
 from needlestack import exceptions
+from needlestack.connections import manager
 from needlestack.whoosh import fields
 from needlestack.whoosh import index
+
 
 class Index1(index.Index):
     content = fields.TextField()
